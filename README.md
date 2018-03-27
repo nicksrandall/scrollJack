@@ -34,7 +34,7 @@ scrollJack.on(SCROLL_DOWN, ({ scollPositionX, inView }) => {
 ## Event Handler Props
 - event: the raw scroll event
 - scrollPositionY: how far the document as been vertically scrolled
-- scrollPositionY: how far the document as been vertically scrolled
+- scrollPositionX: how far the document as been horizontally scrolled
 - goingDown: if the user is scrolling down
 - goingUp: if the user is scrolling up
 - goingLeft: if the user is scrolling left
