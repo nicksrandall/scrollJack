@@ -31,7 +31,7 @@ class ClearableWeakMap {
 }
 
 export const getViewPortSize = () => {
-  var w = window,
+  const w = window,
     d = document,
     e = d.documentElement,
     g = d.getElementsByTagName('body')[0],
