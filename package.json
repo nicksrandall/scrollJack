@@ -1,0 +1,20 @@
+{
+  "name": "scrolljack",
+  "version": "1.0.0",
+  "description": "A library to help with scroll based interactions",
+  "main": "dist/scrollJack.js",
+  "umd:main": "dist/scrollJack.umd.js",
+  "module": "dist/scrollJack.m.js",
+  "source": "src/scrollJack.js",
+  "scripts": {
+    "build": "microbundle --name scrollJack",
+    "dev": "microbundle watch --name scrollJack",
+    "serve": "http-server",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "microbundle": "^0.4.4"
+  }
+}
