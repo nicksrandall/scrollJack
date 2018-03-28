@@ -5,7 +5,7 @@ A tiny (~1kb) helper library for scroll based interactions
 ```js
 import ScrollJack from 'scrolljack'
 
-const scrollJack = new ScrollJack();
+const scrollJack = new ScrollJack(document.body);
 
 const h1 = document.getElementById('heading');
 scrollJack.on(ScrollJack.SCROLL_DOWN, ({ scollPositionX, inView }) => {
@@ -18,6 +18,9 @@ scrollJack.on(ScrollJack.SCROLL_DOWN, ({ scollPositionX, inView }) => {
   }
 })
 ```
+
+## Constructor
+- `ScrollJack(containerElement)` - create a new scroll jack instance for given contianer. If no container is passed, `document.body` is used.
 
 ## Methods
 - `on(eventName, handler)`: register a handler for given event 
