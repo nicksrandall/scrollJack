@@ -1,82 +1,80 @@
-export const events = {
-  SCROLL: 'scroll',
-  SCROLL_VERTICAL: 'scroll-vertical',
-  SCROLL_UP: 'scroll-up',
-  SCROLL_DOWN: 'scroll-down',
-  SCROLL_HORIZONTRAL: 'scroll-horizontal',
-  SCROLL_LEFT: 'scroll-left',
-  SCROLL_RIGHT: 'scroll-right'
+const getViewPortSize = () => ({
+  top: 0,
+  left: 0,
+  width:
+    window.innerWidth ||
+    document.documentElement.clientWidth ||
+    document.body.clientWidth,
+  height:
+    window.innerHeight ||
+    document.documentElement.clientHeight ||
+    document.body.clientHeight
+});
+
+const scrollTop = element => {
+  if (element === document.body) {
+    return (
+      window.pageYOffset ||
+      document.documentElement.scrollTop ||
+      document.body.scrollTop
+    );
+  }
+  return element.scrollTop;
 };
 
-class ClearableWeakMap {
-  constructor(init) {
-    this._wm = new WeakMap(init);
+const scrollLeft = element => {
+  if (element === document.body) {
+    return (
+      window.pageXOffset ||
+      document.documentElement.scrollLeft ||
+      document.body.scrollLeft
+    );
   }
-  clear() {
-    this._wm = new WeakMap();
-  }
-  delete(k) {
-    return this._wm.delete(k);
-  }
-  get(k) {
-    return this._wm.get(k);
-  }
-  has(k) {
-    return this._wm.has(k);
-  }
-  set(k, v) {
-    this._wm.set(k, v);
-    return this;
-  }
-}
-
-export const getViewPortSize = () => {
-  const w = window,
-    d = document,
-    e = d.documentElement,
-    g = d.getElementsByTagName('body')[0],
-    width = w.innerWidth || e.clientWidth || g.clientWidth,
-    height = w.innerHeight || e.clientHeight || g.clientHeight;
-  return { width, height };
+  return element.scrollLeft;
 };
 
-export const scrollTop = () =>
-  document.documentElement.scrollTop || document.body.scrollTop;
-
-export const scrollLeft = () =>
-  document.documentElement.scrollLeft || document.body.scrollLeft;
-
-export class ScrollJack {
-  constructor() {
-    this.events = events;
-    this.registry = {};
+// TODO: support offsets
+class ScrollJack {
+  constructor(element = document.body) {
+    this.element = element;
+    this.registry = Object.create(null);
+    this.bbMap = new Map();
     this.raf = null;
+    this.timeout = null;
     this.lastScrollY = 0;
     this.lastScrollX = 0;
 
-    this.bbMap = new ClearableWeakMap();
-    this.viewport = getViewPortSize();
+    console.log("element", this.element);
 
-    this._handler = this._handler.bind(this);
+    this.viewport =
+      this.element === document.body
+        ? getViewPortSize()
+        : element.getBoundingClientRect();
+
+    this.handler = this.handler.bind(this);
+    this.resize = this.resize.bind(this);
     this.inView = this.inView.bind(this);
     this.aboveView = this.aboveView.bind(this);
     this.belowView = this.belowView.bind(this);
+    this.leftOfView = this.leftOfView.bind(this);
+    this.rightOfView = this.rightOfView.bind(this);
 
-    window.addEventListener('scroll', this._handler, false);
+    if (this.element === document.body) {
+      window.addEventListener("scroll", this.handler, {
+        capture: false,
+        passive: true
+      });
+    } else {
+      this.element.addEventListener("scroll", this.handler, {
+        capture: false,
+        passive: true
+      });
+    }
 
-    let timeout = null;
-    window.addEventListener(
-      'resize',
-      () => {
-        if (timeout) {
-          window.clearTimeout(timeout);
-        }
-        timeout = window.setTimeout(() => {
-          this.viewport = getViewPortSize();
-        }, 16);
-      },
-      false
-    );
+    window.addEventListener("resize", this.resize, {
+      capture: false,
+      passive: true
+    });
   }
   on(name, handler) {
     (this.registry[name] || (this.registry[name] = [])).push(handler);
@@ -97,6 +95,26 @@ export class ScrollJack {
     });
     return this;
   }
+  resize() {
+    if (this.timeout) {
+      window.clearTimeout(timeout);
+    }
+    this.timeout = window.setTimeout(() => {
+      this.viewport =
+        element === document.body
+          ? getViewPortSize()
+          : element.getClientBoundingRect();
+    }, 16);
+  }
+  destory() {
+    if (this.element === document.body) {
+      window.removeEventListener("scroll", this.handler);
+    } else {
+      this.element.removeEventListener("scroll", this.handler);
+    }
+
+    window.removeEventListener("resize", this.resize);
+  }
   getClientBoundingRect(element) {
     let br;
     if (this.bbMap.has(element)) {
@@ -107,19 +125,41 @@ export class ScrollJack {
     }
     return br;
   }
+  // TODO Add offset for container element if not window
   inView(element) {
     const br = this.getClientBoundingRect(element);
-    return br.top > -1 * br.height;
+    return (
+      br.top - this.viewport.top > -1 * br.height &&
+      br.top - this.viewport.top < this.viewport.height &&
+      br.left - this.viewport.left > -1 * br.width &&
+      br.left - this.viewport.left < this.viewport.width
+    );
   }
+  // TODO Add offset for container element if not window
   aboveView(element) {
     const br = this.getClientBoundingRect(element);
-    return br.top < 0;
+    return (
+      br.top - this.viewport.top < 0 &&
+      -1 * (br.top - this.viewport.top) > br.height
+    );
   }
+  // TODO Add offset for container element if not window
   belowView(element) {
     const br = this.getClientBoundingRect(element);
-    return br.top > this.viewport.height;
+    return br.top - this.viewport.top > this.viewport.height;
   }
-  _handler(event) {
+  leftOfView(element) {
+    const br = this.getClientBoundingRect(element);
+    return (
+      br.left - this.viewport.left < 0 &&
+      -1 * (br.left - this.viewport.left) > br.width
+    );
+  }
+  rightOfView(element) {
+    const br = this.getClientBoundingRect(element);
+    return br.left - this.viewport.left > this.viewport.width;
+  }
+  handler(event) {
     if (this.raf) {
       window.cancelAnimationFrame(this.raf);
     }
@@ -128,10 +168,12 @@ export class ScrollJack {
         event,
         inView: this.inView,
         aboveView: this.aboveView,
-        belowView: this.belowView
+        belowView: this.belowView,
+        leftOfView: this.leftOfView,
+        rightOfView: this.rightOfView
       };
-      props.scrollPositionY = scrollTop();
-      props.scrollPositionX = scrollLeft();
+      props.scrollPositionY = scrollTop(this.element);
+      props.scrollPositionX = scrollLeft(this.element);
 
       // vertical
       if (props.scrollPositionY > this.lastScrollY) {
@@ -169,21 +211,29 @@ export class ScrollJack {
       this.lastScrollX = props.scrollPositionX;
 
       // all scrolls
-      this.trigger(events.SCROLL, props);
+      this.trigger(ScrollJack.SCROLL, props);
 
       // vertical scrolls
-      props.goingUp && this.trigger(events.SCROLL_UP, props);
-      props.goingDown && this.trigger(events.SCROLL_DOWN, props);
-      props.vertical && this.trigger(events.SCROLL_VERTICAL, props);
+      props.goingUp && this.trigger(ScrollJack.SCROLL_UP, props);
+      props.goingDown && this.trigger(ScrollJack.SCROLL_DOWN, props);
+      props.vertical && this.trigger(ScrollJack.SCROLL_VERTICAL, props);
 
       // // horizontal scrolls
-      props.goingLeft && this.trigger(events.SCROLL_LEFT, props);
-      props.goingRight && this.trigger(events.SCROLL_RIGHT, props);
-      props.horizontal && this.trigger(events.SCROLL_HORIZONTAL, props);
+      props.goingLeft && this.trigger(ScrollJack.SCROLL_LEFT, props);
+      props.goingRight && this.trigger(ScrollJack.SCROLL_RIGHT, props);
+      props.horizontal && this.trigger(ScrollJack.SCROLL_HORIZONTAL, props);
 
       this.bbMap.clear();
     });
   }
 }
 
-export default new ScrollJack();
+ScrollJack.SCROLL = "SCROLL";
+ScrollJack.SCROLL_VERTICAL = "SCROLL_VERTICAL";
+ScrollJack.SCROLL_UP = "SCROLL_UP";
+ScrollJack.SCROLL_DOWN = "SCROLL_DOWN";
+ScrollJack.SCROLL_HORIZONTAL = "SCROLL_HORIZONTRAL";
+ScrollJack.SCROLL_LEFT = "SCROLL_LEFT";
+ScrollJack.SCROLL_RIGHT = "SCROLL_RIGHT";
+
+export default ScrollJack;

@@ -3,10 +3,12 @@ A tiny (~1kb) helper library for scroll based interactions
 
 ## Usage
 ```js
-import scrollJack, { events: { SCROLL_DOWN } } from 'scrolljack'
+import ScrollJack from 'scrolljack'
+
+const scrollJack = new ScrollJack();
 
 const h1 = document.getElementById('heading');
-scrollJack.on(SCROLL_DOWN, ({ scollPositionX, inView }) => {
+scrollJack.on(ScrollJack.SCROLL_DOWN, ({ scollPositionX, inView }) => {
   if (scrollPositionX <= 0) {
     // at top of page!
   }
@@ -48,3 +50,8 @@ scrollJack.on(SCROLL_DOWN, ({ scollPositionX, inView }) => {
 - `inView(element)`: returns true if element is viewable in viewport
 - `aboveView(element)`: returns true if element is above viewport
 - `belowView(element)`: returns true if element is below viewport
+- `leftOfView(element)`: returns true if element is left of viewport
+- `rightOfView(element)`: returns true if element is right of viewport
+
+## Related Work
+- *https://github.com/stutrek/scrollMonitor* - this project takes an imperative approach to scroll based interactions while ScrollJack attempts to keep things declarative.

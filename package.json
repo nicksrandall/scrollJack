@@ -7,8 +7,8 @@
   "module": "dist/scrollJack.m.js",
   "source": "src/scrollJack.js",
   "scripts": {
-    "build": "microbundle --name scrollJack",
-    "dev": "microbundle watch --name scrollJack",
+    "build": "microbundle --name ScrollJack",
+    "dev": "microbundle watch --name ScrollJack",
     "serve": "http-server",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
