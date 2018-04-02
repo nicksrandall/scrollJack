@@ -38,6 +38,7 @@ scrollJack.on(ScrollJack.SCROLL_DOWN, ({ scollPositionX, inView }) => {
 
 ## Event Handler Props
 - event: the raw scroll event
+- viewport: an object with the width, height, top, bottom, left, right, of scroll container;
 - scrollPositionY: how far the document as been vertically scrolled
 - scrollPositionY: how far the document as been vertically scrolled
 - goingDown: if the user is scrolling down
@@ -50,11 +51,14 @@ scrollJack.on(ScrollJack.SCROLL_DOWN, ({ scollPositionX, inView }) => {
 - deltaX: how far the user has scroll horizontally since last tick (via requestAnimationFrame)
 
 ### Helpers (also passed as props)
+- `getBoundingClientRect(element)`: returns a cached version of bounding client rect for element
 - `inView(element)`: returns true if element is viewable in viewport
 - `aboveView(element)`: returns true if element is above viewport
 - `belowView(element)`: returns true if element is below viewport
 - `leftOfView(element)`: returns true if element is left of viewport
 - `rightOfView(element)`: returns true if element is right of viewport
+- `atTop(element)`: returns true if element is touching top of viewprot
+- `atLeft(element)`: returns true if element is touching left side of viewprot
 
 ## Related Work
 - *https://github.com/stutrek/scrollMonitor* - this project takes an imperative approach to scroll based interactions while ScrollJack attempts to keep things declarative.
