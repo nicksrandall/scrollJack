@@ -1,6 +1,6 @@
 {
   "name": "scrolljack",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A library to help with scroll based interactions",
   "main": "dist/scrollJack.js",
   "umd:main": "dist/scrollJack.umd.js",
