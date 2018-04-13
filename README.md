@@ -40,7 +40,7 @@ scrollJack.on(ScrollJack.SCROLL_DOWN, ({ scollPositionX, inView }) => {
 - event: the raw scroll event
 - viewport: an object with the width, height, top, bottom, left, right, of scroll container;
 - scrollPositionY: how far the document as been vertically scrolled
-- scrollPositionY: how far the document as been vertically scrolled
+- scrollPositionX: how far the document as been horizontally scrolled
 - goingDown: if the user is scrolling down
 - goingUp: if the user is scrolling up
 - goingLeft: if the user is scrolling left
